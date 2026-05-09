@@ -3,173 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Timetable Generator</title>
+    <title>Advanced Timetable Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-slate-100 min-h-screen pb-20">
 
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
-        <header class="bg-indigo-600 text-white p-6">
-            <h1 class="text-3xl font-bold">Timetable Master</h1>
-            <p class="text-indigo-100">Manage teachers, classes, and generate schedules locally.</p>
-        </header>
+    <div class="max-w-6xl mx-auto pt-8 px-4">
+        <div class="bg-indigo-900 text-white p-6 rounded-t-xl shadow-lg">
+            <h1 class="text-3xl font-bold">Academic Scheduler Pro</h1>
+            <p class="opacity-80">9th & 10th Grade Specialization (May 11 - May 23)</p>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+        <div class="bg-white p-6 shadow-md grid grid-cols-1 md:grid-cols-2 gap-8 border-x">
             
-            <!-- SECTION 1: TEACHERS -->
-            <div class="bg-gray-50 p-4 rounded-lg border">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-700 border-b pb-2">Teachers & Subjects</h2>
-                <div class="space-y-2 mb-4">
-                    <input id="tName" type="text" placeholder="Teacher Name" class="w-full p-2 border rounded">
-                    <input id="tSubject" type="text" placeholder="Subject" class="w-full p-2 border rounded">
-                    <button onclick="addTeacher()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Add Teacher</button>
+            <!-- TEACHER MANAGEMENT -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold text-indigo-800 border-b pb-2">1. Teacher & Slot Management</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="tName" type="text" placeholder="Teacher Name" class="p-2 border rounded">
+                    <select id="tSubject" class="p-2 border rounded">
+                        <option value="Math">Math</option>
+                        <option value="Natural Science">Natural Science</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="English">English</option>
+                    </select>
                 </div>
-                <ul id="teacherList" class="space-y-1 max-h-48 overflow-y-auto"></ul>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium">Availability Slot:</label>
+                    <select id="tSlot" class="flex-1 p-2 border rounded bg-yellow-50">
+                        <option value="slot1">11th May - 16th May</option>
+                        <option value="slot2">18th May - 23rd May</option>
+                        <option value="both">Both Slots</option>
+                    </select>
+                </div>
+                <button onclick="addTeacher()" class="w-full bg-indigo-600 text-white py-2 rounded font-bold">Add Teacher</button>
+                
+                <div class="mt-4 p-4 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                    <p class="text-xs font-bold mb-2">IMPORT TEACHERS FROM CSV</p>
+                    <input type="file" id="csvTeachers" accept=".csv" class="text-xs w-full">
+                    <p class="text-[10px] text-gray-500 mt-1">Format: Name, Subject, Slot(slot1/slot2/both)</p>
+                </div>
+                <ul id="teacherList" class="max-h-40 overflow-y-auto space-y-1 text-xs"></ul>
             </div>
 
-            <!-- SECTION 2: CLASSES & SECTIONS -->
-            <div class="bg-gray-50 p-4 rounded-lg border">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-700 border-b pb-2">Classes & Sections</h2>
-                <div class="flex gap-2 mb-4">
-                    <input id="cName" type="text" placeholder="e.g. Grade 10-A" class="flex-1 p-2 border rounded">
-                    <button onclick="addClass()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Add</button>
+            <!-- CLASS CONFIGURATION -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold text-indigo-800 border-b pb-2">2. Class & Section Rules</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="cLevel" class="p-2 border rounded">
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                    </select>
+                    <select id="cSection" class="p-2 border rounded">
+                        <!-- Generated via JS A-Z -->
+                    </select>
                 </div>
-                <ul id="classList" class="space-y-1 max-h-48 overflow-y-auto"></ul>
-            </div>
-
-            <!-- SECTION 3: PERIODS & LUNCH -->
-            <div class="bg-gray-50 p-4 rounded-lg border">
-                <h2 class="text-xl font-semibold mb-4 text-indigo-700 border-b pb-2">Schedule Config</h2>
-                <div class="space-y-2 mb-4">
-                    <div class="flex gap-2">
-                        <input id="pTime" type="time" class="flex-1 p-2 border rounded">
-                        <label class="flex items-center text-sm"><input id="isLunch" type="checkbox" class="mr-1"> Lunch?</label>
-                    </div>
-                    <button onclick="addPeriod()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Add Period</button>
+                <button onclick="addClass()" class="w-full bg-slate-700 text-white py-2 rounded font-bold">Add Section</button>
+                
+                <div class="mt-4 p-4 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                    <p class="text-xs font-bold mb-2">IMPORT CLASSES FROM CSV</p>
+                    <input type="file" id="csvClasses" accept=".csv" class="text-xs w-full">
+                    <p class="text-[10px] text-gray-500 mt-1">Format: Grade, Section (e.g., 9, A)</p>
                 </div>
-                <ul id="periodList" class="space-y-1 max-h-48 overflow-y-auto"></ul>
+                <ul id="classList" class="max-h-40 overflow-y-auto space-y-1 text-xs"></ul>
             </div>
         </div>
 
-        <div class="p-6 border-t text-center">
-            <button onclick="generateTimetable()" class="bg-green-600 text-white px-8 py-3 rounded-full text-lg font-bold hover:bg-green-700 shadow-lg transition">
-                🚀 Generate Timetable
+        <!-- GENERATION CONTROLS -->
+        <div class="bg-indigo-50 p-6 rounded-b-xl border shadow-lg text-center space-x-4">
+            <select id="genSlot" class="p-3 rounded-lg border-2 border-indigo-300 font-bold">
+                <option value="slot1">Generate: 11th May - 16th May</option>
+                <option value="slot2">Generate: 18th May - 23rd May</option>
+            </select>
+            <button onclick="generate()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold shadow-lg transition">
+                Create Timetable
             </button>
+            <button onclick="exportPDF()" class="bg-red-500 text-white px-4 py-3 rounded-lg font-bold">PDF</button>
+            <button onclick="exportExcel()" class="bg-green-800 text-white px-4 py-3 rounded-lg font-bold">Excel</button>
         </div>
 
-        <!-- TIMETABLE DISPLAY -->
-        <div id="timetableResult" class="p-6 overflow-x-auto"></div>
+        <div id="result" class="mt-8 overflow-x-auto"></div>
     </div>
 
     <script>
-        // --- DATA PERSISTENCE LAYER ---
-        let db = JSON.parse(localStorage.getItem('timetableDB')) || {
-            teachers: [],
-            classes: [],
-            periods: []
-        };
+        let db = JSON.parse(localStorage.getItem('tt_v2')) || { teachers: [], classes: [] };
+        const subjects = ["Math", "Natural Science", "Hindi", "Social Science", "English"];
+        const periods = ["07:30 - 08:30", "08:30 - 09:30", "09:30 - 10:30"];
 
-        function save() {
-            localStorage.setItem('timetableDB', JSON.stringify(db));
-            renderAll();
+        // Init Sections A-Z
+        const sectDropdown = document.getElementById('cSection');
+        for(let i=65; i<=90; i++) {
+            let opt = document.createElement('option');
+            opt.value = String.fromCharCode(i);
+            opt.innerText = String.fromCharCode(i);
+            sectDropdown.appendChild(opt);
         }
 
-        // --- CRUD OPERATIONS ---
+        function save() {
+            localStorage.setItem('tt_v2', JSON.stringify(db));
+            render();
+        }
+
         function addTeacher() {
             const name = document.getElementById('tName').value;
             const sub = document.getElementById('tSubject').value;
-            if(!name || !sub) return;
-            db.teachers.push({ id: Date.now(), name, sub });
-            document.getElementById('tName').value = '';
-            document.getElementById('tSubject').value = '';
+            const slot = document.getElementById('tSlot').value;
+            if(!name) return;
+            db.teachers.push({ id: Date.now(), name, sub, slot });
             save();
         }
 
         function addClass() {
-            const name = document.getElementById('cName').value;
-            if(!name) return;
-            db.classes.push({ id: Date.now(), name });
-            document.getElementById('cName').value = '';
+            const grade = document.getElementById('cLevel').value;
+            const sec = document.getElementById('cSection').value;
+            if(db.classes.find(c => c.grade == grade && c.sec == sec)) return alert("Exists!");
+            db.classes.push({ id: Date.now(), grade, sec });
             save();
         }
 
-        function addPeriod() {
-            const time = document.getElementById('pTime').value;
-            const lunch = document.getElementById('isLunch').checked;
-            if(!time) return;
-            db.periods.push({ id: Date.now(), time, lunch });
-            db.periods.sort((a,b) => a.time.localeCompare(b.time));
-            save();
-        }
+        // CSV Parser
+        document.getElementById('csvTeachers').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const lines = reader.result.split('\n');
+                lines.forEach(line => {
+                    const [name, sub, slot] = line.split(',');
+                    if(name && sub) db.teachers.push({ id: Date.now()+Math.random(), name: name.trim(), sub: sub.trim(), slot: slot?.trim() || 'both' });
+                });
+                save();
+            };
+            reader.readAsText(e.target.files[0]);
+        });
+
+        document.getElementById('csvClasses').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const lines = reader.result.split('\n');
+                lines.forEach(line => {
+                    const [grade, sec] = line.split(',');
+                    if(grade && sec) db.classes.push({ id: Date.now()+Math.random(), grade: grade.trim(), sec: sec.trim() });
+                });
+                save();
+            };
+            reader.readAsText(e.target.files[0]);
+        });
 
         function deleteItem(type, id) {
-            db[type] = db[type].filter(item => item.id !== id);
+            db[type] = db[type].filter(i => i.id !== id);
             save();
         }
 
-        // --- UI RENDERING ---
-        function renderAll() {
-            const createList = (items, type, labelKey) => items.map(item => `
-                <li class="flex justify-between items-center bg-white p-2 rounded border shadow-sm text-sm">
-                    <span>${item[labelKey]} ${item.lunch ? '<strong>(LUNCH)</strong>' : ''}</span>
-                    <button onclick="deleteItem('${type}', ${item.id})" class="text-red-500 font-bold px-2">×</button>
-                </li>
-            `).join('');
-
-            document.getElementById('teacherList').innerHTML = createList(db.teachers, 'teachers', 'name');
-            document.getElementById('classList').innerHTML = createList(db.classes, 'classes', 'name');
-            document.getElementById('periodList').innerHTML = createList(db.periods, 'periods', 'time');
+        function render() {
+            document.getElementById('teacherList').innerHTML = db.teachers.map(t => `<li class="flex justify-between p-1 bg-white border rounded"><span>${t.name} (${t.sub}) - <span class="text-indigo-500">${t.slot}</span></span><button onclick="deleteItem('teachers', ${t.id})" class="text-red-500">×</button></li>`).join('');
+            document.getElementById('classList').innerHTML = db.classes.map(c => `<li class="flex justify-between p-1 bg-white border rounded"><span>Grade ${c.grade}-${c.sec}</span><button onclick="deleteItem('classes', ${c.id})" class="text-red-500">×</button></li>`).join('');
         }
 
-        // --- GENERATION ALGORITHM ---
-        function generateTimetable() {
-            if (db.classes.length === 0 || db.periods.length === 0) {
-                alert("Please add at least one Class and one Period.");
-                return;
-            }
-
-            let html = `<table class="w-full border-collapse border border-gray-300">
-                <thead><tr class="bg-gray-200">
-                <th class="border p-2">Class / Period</th>`;
+        function generate() {
+            const activeSlot = document.getElementById('genSlot').value;
+            const filteredTeachers = db.teachers.filter(t => t.slot === activeSlot || t.slot === 'both');
+            const sections9 = db.classes.filter(c => c.grade == "9").sort((a,b) => a.sec.localeCompare(b.sec));
+            const sections10 = db.classes.filter(c => c.grade == "10").sort((a,b) => a.sec.localeCompare(b.sec));
             
-            db.periods.forEach(p => html += `<th class="border p-2">${p.time}</th>`);
-            html += `</tr></thead><tbody>`;
+            if(!filteredTeachers.length) return alert("No teachers available for this slot!");
 
-            // Track teacher usage per period to avoid conflicts
-            let periodUsage = {}; 
+            let teacherBusy = { 0: [], 1: [], 2: [] }; // Track teacher ID per period
+            let outputTable = `<table id="ttTable" class="w-full border-collapse border bg-white shadow-lg text-sm">
+                <thead><tr class="bg-indigo-800 text-white">
+                <th class="border p-2">Class-Section</th>
+                <th class="border p-2">P1 (07:30-08:30)</th>
+                <th class="border p-2">P2 (08:30-09:30)</th>
+                <th class="border p-2">P3 (09:30-10:30)</th>
+                </tr></thead><tbody>`;
 
-            db.classes.forEach(cls => {
-                html += `<tr><td class="border p-2 font-bold bg-indigo-50">${cls.name}</td>`;
+            // Logic for Grade 9: Fixed subjects for slot duration
+            // Assign 3 random distinct subjects from the list for the 3 periods
+            const slotSubjects = [...subjects].sort(() => 0.5 - Math.random()).slice(0, 3);
+
+            const allSections = [...sections9, ...sections10];
+            
+            allSections.forEach((cls) => {
+                outputTable += `<tr><td class="border p-2 font-bold bg-slate-50 text-center">${cls.grade}-${cls.sec}</td>`;
                 
-                db.periods.forEach((p, pIndex) => {
-                    if (p.lunch) {
-                        html += `<td class="border p-2 bg-yellow-100 text-center text-xs font-bold text-yellow-800">LUNCH</td>`;
+                for(let p=0; p<3; p++) {
+                    let targetSub = (cls.grade == "9") ? slotSubjects[p] : subjects[Math.floor(Math.random()*subjects.length)];
+                    
+                    // Find teacher for this subject who is NOT busy this period
+                    let teacher = filteredTeachers.find(t => t.sub === targetSub && !teacherBusy[p].includes(t.id));
+                    
+                    if(teacher) {
+                        teacherBusy[p].push(teacher.id);
+                        outputTable += `<td class="border p-2 text-center"><b>${teacher.sub}</b><br><span class="text-xs text-gray-600">${teacher.name}</span></td>`;
                     } else {
-                        // Logic: Find a teacher not already busy in this period
-                        if (!periodUsage[pIndex]) periodUsage[pIndex] = [];
-                        
-                        let availableTeacher = db.teachers.find(t => !periodUsage[pIndex].includes(t.id));
-                        
-                        if (availableTeacher) {
-                            periodUsage[pIndex].push(availableTeacher.id);
-                            html += `<td class="border p-2 text-xs">
-                                <div class="font-semibold text-indigo-600">${availableTeacher.sub}</div>
-                                <div class="text-gray-500">${availableTeacher.name}</div>
-                            </td>`;
-                        } else {
-                            html += `<td class="border p-2 text-xs text-red-400 italic">No Teacher Avail.</td>`;
-                        }
+                        outputTable += `<td class="border p-2 bg-red-50 text-red-400 italic text-center">Staff Shortage</td>`;
                     }
-                });
-                html += `</tr>`;
+                }
+                outputTable += `</tr>`;
             });
 
-            html += `</tbody></table>`;
-            document.getElementById('timetableResult').innerHTML = html;
+            outputTable += `</tbody></table>`;
+            document.getElementById('result').innerHTML = outputTable;
         }
 
-        // Initial Load
-        renderAll();
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'pt');
+            doc.text(`Timetable - ${document.getElementById('genSlot').value}`, 40, 30);
+            doc.autoTable({ html: '#ttTable', startY: 50 });
+            doc.save("Timetable.pdf");
+        }
+
+        function exportExcel() {
+            const wb = XLSX.utils.table_to_book(document.getElementById("ttTable"));
+            XLSX.writeFile(wb, "Timetable.xlsx");
+        }
+
+        render();
     </script>
 </body>
 </html>
