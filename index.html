@@ -3,116 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Scheduler Pro v5</title>
+    <title>Scheduler Pro v6 - Precise CSV Mapping</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen pb-10">
+<body class="bg-gray-50 min-h-screen pb-20">
 
     <div class="max-w-6xl mx-auto py-6 px-4">
-        <header class="bg-slate-900 text-white p-6 rounded-t-2xl shadow-xl flex justify-between items-center">
+        <!-- HEADER -->
+        <header class="bg-indigo-900 text-white p-6 rounded-t-2xl shadow-xl flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black tracking-tighter uppercase">Scheduler v5</h1>
-                <p class="text-slate-400 text-xs">CSV Auto-Import & Local Persistence</p>
+                <h1 class="text-2xl font-black uppercase tracking-widest">Scheduler v6</h1>
+                <p class="text-indigo-300 text-xs">Precise Slot Mapping: 11th - 23rd May</p>
             </div>
-            <button onclick="clearCache()" class="bg-red-900/50 hover:bg-red-600 text-[10px] px-3 py-2 rounded transition-all">ERASE ALL DATA</button>
+            <button onclick="clearCache()" class="bg-red-500/20 hover:bg-red-600 text-[10px] px-3 py-2 rounded font-bold uppercase transition-all">Clear All Data</button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             
-            <!-- 1. TEACHER ENTRY & CSV -->
+            <!-- 1. CSV & MANUAL ENTRY -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold text-indigo-700 mb-4">1. Add Teachers</h2>
+                <h2 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">1. Input Teachers</h2>
                 
-                <!-- Manual Entry -->
-                <div class="space-y-3 mb-6">
-                    <input id="tName" type="text" placeholder="Teacher Name" class="w-full p-2.5 border rounded-lg outline-none focus:border-indigo-500">
-                    <select id="tSubject" class="w-full p-2.5 border rounded-lg bg-white">
-                        <option>Math</option>
-                        <option>Natural Science</option>
-                        <option>Hindi</option>
-                        <option>Social Science</option>
-                        <option>English</option>
-                    </select>
-                    <select id="tSlot" class="w-full p-2.5 border rounded-lg bg-indigo-50 font-semibold">
-                        <option value="slot1">11th May - 16th May</option>
-                        <option value="slot2">18th May - 23rd May</option>
-                        <option value="both">Both Slots</option>
-                    </select>
-                    <button onclick="addTeacher()" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold shadow hover:bg-indigo-700">Add Manually</button>
+                <div class="p-4 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-xl mb-6">
+                    <label class="block text-[11px] font-black text-indigo-600 mb-2 uppercase text-center">Import Teacher CSV</label>
+                    <input type="file" id="csvTeachers" accept=".csv" class="text-xs w-full cursor-pointer file:bg-indigo-600 file:text-white file:border-0 file:rounded file:px-3 file:py-1 file:mr-2">
+                    <div class="mt-3 text-[9px] text-indigo-400 leading-tight">
+                        <strong>Expected CSV Format:</strong><br>
+                        Teacher, Subject, Slot<br>
+                        <em>Example: Rajesh, Math, Slot 1</em>
+                    </div>
                 </div>
 
-                <!-- CSV Upload Option -->
-                <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl">
-                    <label class="block text-[11px] font-black text-slate-500 mb-2 uppercase">Bulk Import (CSV File)</label>
-                    <input type="file" id="csvTeachers" accept=".csv" class="text-xs w-full file:bg-slate-200 file:border-0 file:rounded file:px-2 file:py-1 file:font-bold cursor-pointer">
-                    <p class="text-[9px] text-slate-400 mt-2 italic">Format: Name, Subject, slot1/slot2/both</p>
+                <div class="space-y-3">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Or Add Manually</p>
+                    <input id="tName" type="text" placeholder="Teacher Name" class="w-full p-2 border rounded-lg text-sm">
+                    <select id="tSubject" class="w-full p-2 border rounded-lg text-sm">
+                        <option>Math</option><option>Natural Science</option><option>Hindi</option>
+                        <option>Social Science</option><option>English</option>
+                    </select>
+                    <select id="tSlot" class="w-full p-2 border rounded-lg text-sm bg-gray-50">
+                        <option value="slot 1">Slot 1 (11th-16th May)</option>
+                        <option value="slot 2">Slot 2 (18th-23rd May)</option>
+                        <option value="both">Both</option>
+                    </select>
+                    <button onclick="addTeacher()" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700">Add Teacher</button>
                 </div>
             </div>
 
-            <!-- 2. MANAGE & DELETE -->
+            <!-- 2. DATA MANAGEMENT -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold text-red-600 mb-4">2. Manage List</h2>
-                
+                <h2 class="text-lg font-bold text-red-600 mb-4 border-b pb-2">2. Manage & Class</h2>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Registered Teachers</label>
-                        <select id="deleteSelector" class="w-full p-2.5 border rounded-lg bg-white mt-1"></select>
-                        <button onclick="deleteSelectedTeacher()" class="w-full bg-red-50 text-red-600 py-2 rounded-lg font-bold mt-2 hover:bg-red-100">Delete Selected</button>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Delete Teacher</label>
+                        <select id="deleteSelector" class="w-full p-2 border rounded-lg text-sm mt-1"></select>
+                        <button onclick="deleteSelectedTeacher()" class="w-full bg-red-50 text-red-600 py-2 rounded-lg font-bold mt-2 text-xs hover:bg-red-100">Remove Selected</button>
                     </div>
-
                     <div class="pt-4 border-t">
-                        <h3 class="font-bold text-slate-700 text-sm mb-2">Class Setup</h3>
-                        <div class="flex gap-2">
-                            <select id="cLevel" class="p-2 border rounded-lg flex-1"><option value="9">9th</option><option value="10">10th</option></select>
-                            <select id="cSection" class="p-2 border rounded-lg flex-1"></select>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Add Class Section</label>
+                        <div class="flex gap-2 mt-1">
+                            <select id="cLevel" class="p-2 border rounded-lg flex-1 text-sm"><option value="9">9th</option><option value="10">10th</option></select>
+                            <select id="cSection" class="p-2 border rounded-lg flex-1 text-sm"></select>
                         </div>
-                        <button onclick="addClass()" class="w-full bg-slate-800 text-white py-2 rounded-lg font-bold mt-2">Add Section</button>
+                        <button onclick="addClass()" class="w-full bg-slate-800 text-white py-2 rounded-lg font-bold mt-2 text-xs">Add Section</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. RUN GENERATOR -->
+            <!-- 3. GENERATOR -->
             <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-green-500">
-                <h2 class="text-lg font-bold text-green-700 mb-4">3. Generate</h2>
+                <h2 class="text-lg font-bold text-green-700 mb-4 border-b pb-2">3. Run Tool</h2>
                 <div class="space-y-4">
-                    <select id="genSlot" class="w-full p-3 rounded border-2 border-green-200 font-bold bg-green-50 text-green-800">
-                        <option value="slot1">11th May - 16th May</option>
-                        <option value="slot2">18th May - 23rd May</option>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Target Generation Slot</label>
+                    <select id="genSlot" class="w-full p-3 rounded border bg-green-50 font-bold text-green-800">
+                        <option value="slot 1">11th May - 16th May (Slot 1)</option>
+                        <option value="slot 2">18th May - 23rd May (Slot 2)</option>
                     </select>
+                    <button onclick="generate()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-xl shadow-lg hover:bg-green-700">GENERATE</button>
                     
-                    <div class="bg-slate-50 p-4 rounded-lg text-[11px] text-slate-600 space-y-1">
-                        <p>✔ <strong>Automatic Clubbing:</strong> Enabled</p>
-                        <p>✔ <strong>Teacher Persistence:</strong> Active</p>
-                        <p>✔ <strong>Periods:</strong> 3 (1hr each)</p>
+                    <div class="flex gap-2">
+                        <button onclick="exportPDF()" class="flex-1 bg-red-600 text-white py-2 rounded font-bold text-xs">PDF</button>
+                        <button onclick="exportExcel()" class="flex-1 bg-green-800 text-white py-2 rounded font-bold text-xs">Excel</button>
                     </div>
-
-                    <button onclick="generate()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
-                        RUN GENERATOR
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- EXPORT OPTIONS -->
-        <div class="mt-8 flex items-center gap-4 border-t pt-6">
-            <button onclick="exportPDF()" class="bg-red-600 text-white px-6 py-2 rounded-full font-bold shadow hover:bg-red-700">PDF</button>
-            <button onclick="exportExcel()" class="bg-green-800 text-white px-6 py-2 rounded-full font-bold shadow hover:bg-green-900">Excel</button>
-            <div class="ml-auto text-xs font-bold text-slate-500">
-                DB Stats: <span id="tCount" class="text-indigo-600">0</span> Teachers | <span id="cCount" class="text-indigo-600">0</span> Sections
-            </div>
+        <!-- TEACHER REPOSITORY VIEW -->
+        <div class="mt-8">
+            <h3 class="text-sm font-black text-slate-400 uppercase mb-4 tracking-widest">Active Teacher Repository</h3>
+            <div id="teacherRepo" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
         </div>
 
-        <div id="result" class="mt-8 bg-white rounded-xl shadow-2xl overflow-hidden border">
-            <div class="p-20 text-center text-slate-300 italic">No timetable generated yet.</div>
+        <!-- RESULTS TABLE -->
+        <div id="result" class="mt-10 bg-white rounded-xl shadow-2xl overflow-hidden border">
+            <div class="p-10 text-center text-slate-300 italic">Timetable will be rendered here...</div>
         </div>
     </div>
 
     <script>
-        // --- DATA PERSISTENCE (LocalStorage) ---
-        let db = JSON.parse(localStorage.getItem('tt_final_v5')) || { teachers: [], classes: [] };
+        let db = JSON.parse(localStorage.getItem('tt_v6')) || { teachers: [], classes: [] };
         const subjects = ["Math", "Natural Science", "Hindi", "Social Science", "English"];
 
         // Init Sections
@@ -124,35 +117,39 @@
         }
 
         function save() {
-            localStorage.setItem('tt_final_v5', JSON.stringify(db));
+            localStorage.setItem('tt_v6', JSON.stringify(db));
             refreshUI();
         }
 
         function refreshUI() {
+            // Refresh Delete Dropdown
             const selector = document.getElementById('deleteSelector');
-            // Refresh the teacher dropdown list
-            selector.innerHTML = '<option value="">-- View All Teachers --</option>' + 
-                db.teachers.map(t => `<option value="${t.id}">${t.name} [${t.sub}] - ${t.slot}</option>`).join('');
-            
-            document.getElementById('tCount').innerText = db.teachers.length;
-            document.getElementById('cCount').innerText = db.classes.length;
+            selector.innerHTML = '<option value="">-- Select Teacher --</option>' + 
+                db.teachers.map(t => `<option value="${t.id}">${t.name} (${t.sub})</option>`).join('');
+
+            // Refresh Visual Repository
+            document.getElementById('teacherRepo').innerHTML = db.teachers.map(t => `
+                <div class="bg-white border p-3 rounded shadow-sm text-center">
+                    <div class="font-bold text-indigo-700 text-xs truncate">${t.name}</div>
+                    <div class="text-[9px] text-gray-500 uppercase font-bold">${t.sub}</div>
+                    <div class="mt-2 text-[8px] px-1 bg-gray-100 rounded text-gray-400">${t.slot}</div>
+                </div>
+            `).join('');
         }
 
-        // --- CORE ACTIONS ---
         function addTeacher() {
             const name = document.getElementById('tName').value.trim();
             const sub = document.getElementById('tSubject').value;
             const slot = document.getElementById('tSlot').value;
-            if(!name) return alert("Enter Teacher Name");
-            
-            db.teachers.push({ id: Date.now() + Math.random(), name, sub, slot });
+            if(!name) return;
+            db.teachers.push({ id: Date.now() + Math.random(), name, sub, slot: slot.toLowerCase() });
             document.getElementById('tName').value = '';
             save();
         }
 
         function deleteSelectedTeacher() {
             const id = document.getElementById('deleteSelector').value;
-            if(!id) return alert("Please select a teacher from the list.");
+            if(!id) return;
             db.teachers = db.teachers.filter(t => t.id != id);
             save();
         }
@@ -160,126 +157,109 @@
         function addClass() {
             const grade = document.getElementById('cLevel').value;
             const sec = document.getElementById('cSection').value;
-            if(db.classes.find(c => c.grade == grade && c.sec == sec)) return alert("Section exists.");
+            if(db.classes.find(c => c.grade == grade && c.sec == sec)) return;
             db.classes.push({ id: Date.now(), grade, sec });
             save();
         }
 
         function clearCache() {
-            if(confirm("This will delete all saved data. Proceed?")) {
-                localStorage.removeItem('tt_final_v5');
-                location.reload();
-            }
+            if(confirm("Erase all data?")) { localStorage.removeItem('tt_v6'); location.reload(); }
         }
 
-        // --- CSV IMPORT ENGINE ---
+        // --- ENHANCED CSV PARSER ---
         document.getElementById('csvTeachers').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const text = event.target.result;
-                const rows = text.split(/\r?\n/);
-                let importCount = 0;
+            reader.onload = function(ev) {
+                const lines = ev.target.result.split(/\r?\n/);
+                lines.forEach(line => {
+                    const cols = line.split(',');
+                    if(cols.length >= 2) {
+                        const name = cols[0].trim();
+                        const sub = cols[1].trim();
+                        let rawSlot = cols[2] ? cols[2].trim().toLowerCase() : 'both';
+                        
+                        // Normalize Slot Naming from CSV
+                        let finalSlot = 'both';
+                        if(rawSlot.includes('slot 1')) finalSlot = 'slot 1';
+                        else if(rawSlot.includes('slot 2')) finalSlot = 'slot 2';
 
-                rows.forEach(row => {
-                    const columns = row.split(',');
-                    if (columns.length >= 2) {
-                        const name = columns[0].trim();
-                        const sub = columns[1].trim();
-                        const slot = columns[2] ? columns[2].trim().toLowerCase() : 'both';
-
-                        if (name && sub) {
-                            db.teachers.push({
-                                id: Date.now() + Math.random(),
-                                name: name,
-                                sub: sub,
-                                slot: (slot === 'slot1' || slot === 'slot2') ? slot : 'both'
-                            });
-                            importCount++;
+                        if(name && sub) {
+                            db.teachers.push({ id: Date.now() + Math.random(), name, sub, slot: finalSlot });
                         }
                     }
                 });
-                
                 save();
-                alert(`Successfully imported ${importCount} teachers!`);
-                e.target.value = ''; // Reset file input
+                alert("Imported successfully. Check the Repository below.");
             };
             reader.readAsText(file);
         });
 
-        // --- TIMETABLE GENERATION (Rule: Clubbing + Consistency) ---
+        // --- GENERATOR WITH CLUBBING ---
         function generate() {
-            const activeSlot = document.getElementById('genSlot').value;
-            let staff = db.teachers.filter(t => t.slot === activeSlot || t.slot === 'both');
-            let groups = [...db.classes].sort((a,b) => a.grade - b.grade || a.sec.localeCompare(b.sec));
-            
-            if(!staff.length) return alert("No teachers available for this slot!");
-            if(!groups.length) return alert("Add at least one class section!");
+            const targetSlot = document.getElementById('genSlot').value.toLowerCase();
+            let staff = db.teachers.filter(t => t.slot === targetSlot || t.slot === 'both');
+            let sections = [...db.classes].sort((a,b) => a.grade - b.grade || a.sec.localeCompare(b.sec));
+
+            if(!staff.length) return alert("No teachers found for this slot.");
 
             let teacherBusy = { 0: [], 1: [], 2: [] }; 
-            let finalOutput = [];
-            let processedIds = new Set();
+            let rows = [];
+            let processed = new Set();
 
-            groups.forEach((group) => {
-                if(processedIds.has(group.id)) return;
+            sections.forEach(sec => {
+                if(processed.has(sec.id)) return;
 
-                let row = { title: `${group.grade}-${group.sec}`, pData: [] };
+                let row = { label: `${sec.grade}-${sec.sec}`, periods: [] };
                 
                 for(let p=0; p<3; p++) {
-                    let availableTeachers = staff.filter(t => !teacherBusy[p].includes(t.id));
-                    let randomSubs = [...subjects].sort(() => 0.5 - Math.random());
+                    let shuffledSubs = [...subjects].sort(() => 0.5 - Math.random());
                     let assigned = false;
 
-                    for(let s of randomSubs) {
-                        let match = availableTeachers.find(t => t.sub === s);
-                        if(match) {
-                            teacherBusy[p].push(match.id);
-                            row.pData[p] = { sub: match.sub, name: match.name, isClub: false };
+                    for(let s of shuffledSubs) {
+                        let t = staff.find(teacher => teacher.sub === s && !teacherBusy[p].includes(teacher.id));
+                        if(t) {
+                            teacherBusy[p].push(t.id);
+                            row.periods[p] = { sub: t.sub, name: t.name, club: false };
                             assigned = true;
                             break;
                         }
                     }
 
-                    // AUTO-CLUBBING Logic
                     if(!assigned) {
-                        let prevClass = finalOutput.find(item => item.pData[p] && !item.pData[p].isClub && item.title.startsWith(group.grade));
-                        if(prevClass) {
-                            row.title += ` & ${group.sec}`;
-                            row.pData[p] = { ...prevClass.pData[p], isClub: true };
-                            prevClass.pData[p].isClub = true;
+                        let clubTarget = rows.find(prev => prev.periods[p] && !prev.periods[p].club && prev.label.startsWith(sec.grade));
+                        if(clubTarget) {
+                            row.label += ` & ${sec.sec}`;
+                            row.periods[p] = { ...clubTarget.periods[p], club: true };
+                            clubTarget.periods[p].club = true;
                             assigned = true;
                         } else {
-                            row.pData[p] = { sub: "No Staff", name: "Shortage", isClub: false };
+                            row.periods[p] = { sub: "No Staff", name: "Merge Needed", club: false };
                         }
                     }
                 }
-                finalOutput.push(row);
-                processedIds.add(group.id);
+                rows.push(row);
+                processed.add(sec.id);
             });
 
-            renderTable(finalOutput);
+            render(rows);
         }
 
-        function renderTable(data) {
-            let html = `<table id="mainTable" class="w-full border-collapse">
-                <thead class="bg-slate-900 text-white">
-                    <tr><th class="p-4 border border-slate-700">Section</th>
-                    <th class="p-4 border border-slate-700 text-center">07:30 - 08:30</th>
-                    <th class="p-4 border border-slate-700 text-center">08:30 - 09:30</th>
-                    <th class="p-4 border border-slate-700 text-center">09:30 - 10:30</th></tr>
+        function render(data) {
+            let html = `<table id="resTable" class="w-full border-collapse text-xs">
+                <thead class="bg-indigo-900 text-white">
+                    <tr><th class="p-3 border border-indigo-800">Class Section</th>
+                    <th class="p-3 border border-indigo-800">07:30 - 08:30</th>
+                    <th class="p-3 border border-indigo-800">08:30 - 09:30</th>
+                    <th class="p-3 border border-indigo-800">09:30 - 10:30</th></tr>
                 </thead><tbody>`;
-            
-            data.forEach(row => {
-                html += `<tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-4 border font-bold text-center bg-slate-50">${row.title}</td>`;
-                row.pData.forEach(cell => {
-                    const clubClass = cell.isClub ? "bg-amber-50" : "";
-                    html += `<td class="p-4 border text-center ${clubClass}">
-                        <div class="font-extrabold text-indigo-700">${cell.sub}</div>
-                        <div class="text-[10px] text-slate-500 font-medium">${cell.name}</div>
-                        ${cell.isClub ? '<span class="text-[8px] font-black text-amber-600 uppercase">Clubbed</span>' : ''}
+            data.forEach(r => {
+                html += `<tr><td class="p-3 border font-bold bg-gray-50 text-center">${r.label}</td>`;
+                r.periods.forEach(c => {
+                    html += `<td class="p-3 border text-center ${c.club ? 'bg-amber-50' : ''}">
+                        <div class="font-bold text-indigo-700">${c.sub}</div>
+                        <div class="text-[9px] text-gray-500">${c.name}</div>
+                        ${c.club ? '<div class="text-[8px] font-bold text-amber-600 uppercase mt-1">Clubbed</div>' : ''}
                     </td>`;
                 });
                 html += `</tr>`;
@@ -289,16 +269,15 @@
 
         function exportPDF() { 
             const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'pt');
-            doc.autoTable({ html: '#mainTable', theme: 'grid', styles: {fontSize: 8} });
+            doc.autoTable({ html: '#resTable', theme: 'grid', styles: {fontSize: 7} });
             doc.save("Timetable.pdf"); 
         }
 
         function exportExcel() { 
-            const wb = XLSX.utils.table_to_book(document.getElementById("mainTable")); 
+            const wb = XLSX.utils.table_to_book(document.getElementById("resTable")); 
             XLSX.writeFile(wb, "Timetable.xlsx"); 
         }
 
-        // Load Cache on startup
         refreshUI();
     </script>
 </body>
