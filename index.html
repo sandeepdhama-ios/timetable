@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Timetable Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <header class="bg-indigo-600 text-white p-6">
+            <h1 class="text-3xl font-bold">Timetable Master</h1>
+            <p class="text-indigo-100">Manage teachers, classes, and generate schedules locally.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+            
+            <!-- SECTION 1: TEACHERS -->
+            <div class="bg-gray-50 p-4 rounded-lg border">
+                <h2 class="text-xl font-semibold mb-4 text-indigo-700 border-b pb-2">Teachers & Subjects</h2>
+                <div class="space-y-2 mb-4">
+                    <input id="tName" type="text" placeholder="Teacher Name" class="w-full p-2 border rounded">
+                    <input id="tSubject" type="text" placeholder="Subject" class="w-full p-2 border rounded">
+                    <button onclick="addTeacher()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Add Teacher</button>
+                </div>
+                <ul id="teacherList" class="space-y-1 max-h-48 overflow-y-auto"></ul>
+            </div>
+
+            <!-- SECTION 2: CLASSES & SECTIONS -->
+            <div class="bg-gray-50 p-4 rounded-lg border">
+                <h2 class="text-xl font-semibold mb-4 text-indigo-700 border-b pb-2">Classes & Sections</h2>
+                <div class="flex gap-2 mb-4">
+                    <input id="cName" type="text" placeholder="e.g. Grade 10-A" class="flex-1 p-2 border rounded">
+                    <button onclick="addClass()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Add</button>
+                </div>
+                <ul id="classList" class="space-y-1 max-h-48 overflow-y-auto"></ul>
+            </div>
+
+            <!-- SECTION 3: PERIODS & LUNCH -->
+            <div class="bg-gray-50 p-4 rounded-lg border">
+                <h2 class="text-xl font-semibold mb-4 text-indigo-700 border-b pb-2">Schedule Config</h2>
+                <div class="space-y-2 mb-4">
+                    <div class="flex gap-2">
+                        <input id="pTime" type="time" class="flex-1 p-2 border rounded">
+                        <label class="flex items-center text-sm"><input id="isLunch" type="checkbox" class="mr-1"> Lunch?</label>
+                    </div>
+                    <button onclick="addPeriod()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Add Period</button>
+                </div>
+                <ul id="periodList" class="space-y-1 max-h-48 overflow-y-auto"></ul>
+            </div>
+        </div>
+
+        <div class="p-6 border-t text-center">
+            <button onclick="generateTimetable()" class="bg-green-600 text-white px-8 py-3 rounded-full text-lg font-bold hover:bg-green-700 shadow-lg transition">
+                🚀 Generate Timetable
+            </button>
+        </div>
+
+        <!-- TIMETABLE DISPLAY -->
+        <div id="timetableResult" class="p-6 overflow-x-auto"></div>
+    </div>
+
+    <script>
+        // --- DATA PERSISTENCE LAYER ---
+        let db = JSON.parse(localStorage.getItem('timetableDB')) || {
+            teachers: [],
+            classes: [],
+            periods: []
+        };
+
+        function save() {
+            localStorage.setItem('timetableDB', JSON.stringify(db));
+            renderAll();
+        }
+
+        // --- CRUD OPERATIONS ---
+        function addTeacher() {
+            const name = document.getElementById('tName').value;
+            const sub = document.getElementById('tSubject').value;
+            if(!name || !sub) return;
+            db.teachers.push({ id: Date.now(), name, sub });
+            document.getElementById('tName').value = '';
+            document.getElementById('tSubject').value = '';
+            save();
+        }
+
+        function addClass() {
+            const name = document.getElementById('cName').value;
+            if(!name) return;
+            db.classes.push({ id: Date.now(), name });
+            document.getElementById('cName').value = '';
+            save();
+        }
+
+        function addPeriod() {
+            const time = document.getElementById('pTime').value;
+            const lunch = document.getElementById('isLunch').checked;
+            if(!time) return;
+            db.periods.push({ id: Date.now(), time, lunch });
+            db.periods.sort((a,b) => a.time.localeCompare(b.time));
+            save();
+        }
+
+        function deleteItem(type, id) {
+            db[type] = db[type].filter(item => item.id !== id);
+            save();
+        }
+
+        // --- UI RENDERING ---
+        function renderAll() {
+            const createList = (items, type, labelKey) => items.map(item => `
+                <li class="flex justify-between items-center bg-white p-2 rounded border shadow-sm text-sm">
+                    <span>${item[labelKey]} ${item.lunch ? '<strong>(LUNCH)</strong>' : ''}</span>
+                    <button onclick="deleteItem('${type}', ${item.id})" class="text-red-500 font-bold px-2">×</button>
+                </li>
+            `).join('');
+
+            document.getElementById('teacherList').innerHTML = createList(db.teachers, 'teachers', 'name');
+            document.getElementById('classList').innerHTML = createList(db.classes, 'classes', 'name');
+            document.getElementById('periodList').innerHTML = createList(db.periods, 'periods', 'time');
+        }
+
+        // --- GENERATION ALGORITHM ---
+        function generateTimetable() {
+            if (db.classes.length === 0 || db.periods.length === 0) {
+                alert("Please add at least one Class and one Period.");
+                return;
+            }
+
+            let html = `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr class="bg-gray-200">
+                <th class="border p-2">Class / Period</th>`;
+            
+            db.periods.forEach(p => html += `<th class="border p-2">${p.time}</th>`);
+            html += `</tr></thead><tbody>`;
+
+            // Track teacher usage per period to avoid conflicts
+            let periodUsage = {}; 
+
+            db.classes.forEach(cls => {
+                html += `<tr><td class="border p-2 font-bold bg-indigo-50">${cls.name}</td>`;
+                
+                db.periods.forEach((p, pIndex) => {
+                    if (p.lunch) {
+                        html += `<td class="border p-2 bg-yellow-100 text-center text-xs font-bold text-yellow-800">LUNCH</td>`;
+                    } else {
+                        // Logic: Find a teacher not already busy in this period
+                        if (!periodUsage[pIndex]) periodUsage[pIndex] = [];
+                        
+                        let availableTeacher = db.teachers.find(t => !periodUsage[pIndex].includes(t.id));
+                        
+                        if (availableTeacher) {
+                            periodUsage[pIndex].push(availableTeacher.id);
+                            html += `<td class="border p-2 text-xs">
+                                <div class="font-semibold text-indigo-600">${availableTeacher.sub}</div>
+                                <div class="text-gray-500">${availableTeacher.name}</div>
+                            </td>`;
+                        } else {
+                            html += `<td class="border p-2 text-xs text-red-400 italic">No Teacher Avail.</td>`;
+                        }
+                    }
+                });
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table>`;
+            document.getElementById('timetableResult').innerHTML = html;
+        }
+
+        // Initial Load
+        renderAll();
+    </script>
+</body>
+</html>
