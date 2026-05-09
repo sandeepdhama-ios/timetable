@@ -3,33 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Scheduler Pro v4</title>
+    <title>Master Scheduler Pro v5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen pb-10">
+<body class="bg-slate-50 min-h-screen pb-10">
 
     <div class="max-w-6xl mx-auto py-6 px-4">
-        <header class="bg-indigo-800 text-white p-6 rounded-t-2xl shadow-xl flex justify-between items-center">
+        <header class="bg-slate-900 text-white p-6 rounded-t-2xl shadow-xl flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight">Scheduler Master</h1>
-                <p class="text-indigo-200 text-sm">9th & 10th Grade • Auto-Clubbing • Persistence Enabled</p>
+                <h1 class="text-2xl font-black tracking-tighter uppercase">Scheduler v5</h1>
+                <p class="text-slate-400 text-xs">CSV Auto-Import & Local Persistence</p>
             </div>
-            <button onclick="clearCache()" class="bg-indigo-900 hover:bg-red-600 text-[10px] px-3 py-2 rounded transition-all">HARD RESET DATA</button>
+            <button onclick="clearCache()" class="bg-red-900/50 hover:bg-red-600 text-[10px] px-3 py-2 rounded transition-all">ERASE ALL DATA</button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             
-            <!-- 1. TEACHER & CSV INPUT -->
+            <!-- 1. TEACHER ENTRY & CSV -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold text-indigo-800 mb-4 flex items-center">
-                    <span class="bg-indigo-100 text-indigo-800 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">1</span>
-                    Add Teacher
-                </h2>
-                <div class="space-y-3">
-                    <input id="tName" type="text" placeholder="Teacher Name" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <h2 class="text-lg font-bold text-indigo-700 mb-4">1. Add Teachers</h2>
+                
+                <!-- Manual Entry -->
+                <div class="space-y-3 mb-6">
+                    <input id="tName" type="text" placeholder="Teacher Name" class="w-full p-2.5 border rounded-lg outline-none focus:border-indigo-500">
                     <select id="tSubject" class="w-full p-2.5 border rounded-lg bg-white">
                         <option>Math</option>
                         <option>Natural Science</option>
@@ -37,102 +36,86 @@
                         <option>Social Science</option>
                         <option>English</option>
                     </select>
-                    <select id="tSlot" class="w-full p-2.5 border rounded-lg bg-amber-50 font-medium">
+                    <select id="tSlot" class="w-full p-2.5 border rounded-lg bg-indigo-50 font-semibold">
                         <option value="slot1">11th May - 16th May</option>
                         <option value="slot2">18th May - 23rd May</option>
                         <option value="both">Both Slots</option>
                     </select>
-                    <button onclick="addTeacher()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-bold shadow-md">Add to Database</button>
-                    
-                    <div class="pt-4 border-t mt-4">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase">Bulk Import (CSV)</label>
-                        <input type="file" id="csvTeachers" accept=".csv" class="text-xs w-full block file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                    </div>
+                    <button onclick="addTeacher()" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold shadow hover:bg-indigo-700">Add Manually</button>
+                </div>
+
+                <!-- CSV Upload Option -->
+                <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl">
+                    <label class="block text-[11px] font-black text-slate-500 mb-2 uppercase">Bulk Import (CSV File)</label>
+                    <input type="file" id="csvTeachers" accept=".csv" class="text-xs w-full file:bg-slate-200 file:border-0 file:rounded file:px-2 file:py-1 file:font-bold cursor-pointer">
+                    <p class="text-[9px] text-slate-400 mt-2 italic">Format: Name, Subject, slot1/slot2/both</p>
                 </div>
             </div>
 
-            <!-- 2. MANAGEMENT & BULK DELETE -->
+            <!-- 2. MANAGE & DELETE -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold text-red-700 mb-4 flex items-center">
-                    <span class="bg-red-100 text-red-700 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">2</span>
-                    Manage & Delete
-                </h2>
+                <h2 class="text-lg font-bold text-red-600 mb-4">2. Manage List</h2>
+                
                 <div class="space-y-4">
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Select Teacher to Remove</label>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Registered Teachers</label>
                         <select id="deleteSelector" class="w-full p-2.5 border rounded-lg bg-white mt-1"></select>
-                        <button onclick="deleteSelectedTeacher()" class="w-full bg-red-100 text-red-700 py-2 rounded-lg font-bold mt-2 hover:bg-red-200 transition-colors">Delete Entry</button>
+                        <button onclick="deleteSelectedTeacher()" class="w-full bg-red-50 text-red-600 py-2 rounded-lg font-bold mt-2 hover:bg-red-100">Delete Selected</button>
                     </div>
 
                     <div class="pt-4 border-t">
-                        <h3 class="font-bold text-slate-700 text-sm mb-3">Class/Section Management</h3>
+                        <h3 class="font-bold text-slate-700 text-sm mb-2">Class Setup</h3>
                         <div class="flex gap-2">
-                            <select id="cLevel" class="p-2 border rounded-lg flex-1 bg-white text-sm">
-                                <option value="9">Grade 9</option>
-                                <option value="10">Grade 10</option>
-                            </select>
-                            <select id="cSection" class="p-2 border rounded-lg flex-1 bg-white text-sm"></select>
+                            <select id="cLevel" class="p-2 border rounded-lg flex-1"><option value="9">9th</option><option value="10">10th</option></select>
+                            <select id="cSection" class="p-2 border rounded-lg flex-1"></select>
                         </div>
-                        <button onclick="addClass()" class="w-full bg-slate-800 text-white py-2 rounded-lg font-bold mt-2 hover:bg-slate-900">Add Section</button>
+                        <button onclick="addClass()" class="w-full bg-slate-800 text-white py-2 rounded-lg font-bold mt-2">Add Section</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. GEN RULES & RUN -->
-            <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-green-500 ring-4 ring-green-50">
-                <h2 class="text-lg font-bold text-green-700 mb-4 flex items-center">
-                    <span class="bg-green-100 text-green-700 rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2">3</span>
-                    Final Generation
-                </h2>
+            <!-- 3. RUN GENERATOR -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-green-500">
+                <h2 class="text-lg font-bold text-green-700 mb-4">3. Generate</h2>
                 <div class="space-y-4">
-                    <div class="p-4 bg-green-50 rounded-lg border border-green-100">
-                        <label class="block text-xs font-bold text-green-800 mb-1">Target Slot</label>
-                        <select id="genSlot" class="w-full p-2 bg-white border border-green-300 rounded font-bold text-green-900">
-                            <option value="slot1">May 11 - May 16</option>
-                            <option value="slot2">May 18 - May 23</option>
-                        </select>
-                    </div>
+                    <select id="genSlot" class="w-full p-3 rounded border-2 border-green-200 font-bold bg-green-50 text-green-800">
+                        <option value="slot1">11th May - 16th May</option>
+                        <option value="slot2">18th May - 23rd May</option>
+                    </select>
                     
-                    <ul class="text-[11px] text-slate-500 space-y-1.5 px-1">
-                        <li class="flex items-center">✅ Auto-merge sections if no staff</li>
-                        <li class="flex items-center">✅ 3 Periods (07:30 - 10:30)</li>
-                        <li class="flex items-center">✅ Subject consistency per slot</li>
-                        <li class="flex items-center">✅ 100% Data Persistence</li>
-                    </ul>
+                    <div class="bg-slate-50 p-4 rounded-lg text-[11px] text-slate-600 space-y-1">
+                        <p>✔ <strong>Automatic Clubbing:</strong> Enabled</p>
+                        <p>✔ <strong>Teacher Persistence:</strong> Active</p>
+                        <p>✔ <strong>Periods:</strong> 3 (1hr each)</p>
+                    </div>
 
-                    <button onclick="generate()" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-black text-xl shadow-xl transform active:scale-95 transition-all">
+                    <button onclick="generate()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
                         RUN GENERATOR
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- EXPORT BAR -->
-        <div class="mt-8 flex flex-wrap gap-3 items-center justify-center lg:justify-start">
-            <button onclick="exportPDF()" class="bg-white border border-red-200 text-red-600 px-6 py-2.5 rounded-full font-bold shadow-sm hover:bg-red-50 transition-all flex items-center">
-                PDF Export
-            </button>
-            <button onclick="exportExcel()" class="bg-white border border-green-200 text-green-700 px-6 py-2.5 rounded-full font-bold shadow-sm hover:bg-green-50 transition-all flex items-center">
-                Excel Export
-            </button>
-            <div class="text-xs text-slate-400 font-medium ml-auto bg-white px-4 py-2 rounded-full border">
-                Current Records: <span id="tCount" class="text-indigo-600 font-bold">0</span> Teachers | <span id="cCount" class="text-indigo-600 font-bold">0</span> Sections
+        <!-- EXPORT OPTIONS -->
+        <div class="mt-8 flex items-center gap-4 border-t pt-6">
+            <button onclick="exportPDF()" class="bg-red-600 text-white px-6 py-2 rounded-full font-bold shadow hover:bg-red-700">PDF</button>
+            <button onclick="exportExcel()" class="bg-green-800 text-white px-6 py-2 rounded-full font-bold shadow hover:bg-green-900">Excel</button>
+            <div class="ml-auto text-xs font-bold text-slate-500">
+                DB Stats: <span id="tCount" class="text-indigo-600">0</span> Teachers | <span id="cCount" class="text-indigo-600">0</span> Sections
             </div>
         </div>
 
-        <div id="result" class="mt-8 bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 min-h-[200px]">
-            <div class="p-20 text-center text-slate-300">
-                <p class="italic">Timetable will appear here once generated...</p>
-            </div>
+        <div id="result" class="mt-8 bg-white rounded-xl shadow-2xl overflow-hidden border">
+            <div class="p-20 text-center text-slate-300 italic">No timetable generated yet.</div>
         </div>
     </div>
 
     <script>
-        // --- CORE DATA ENGINE (PERSISTENT) ---
-        let db = JSON.parse(localStorage.getItem('tt_master_v4')) || { teachers: [], classes: [] };
+        // --- DATA PERSISTENCE (LocalStorage) ---
+        let db = JSON.parse(localStorage.getItem('tt_final_v5')) || { teachers: [], classes: [] };
         const subjects = ["Math", "Natural Science", "Hindi", "Social Science", "English"];
 
-        // Init Sections A-Z
+        // Init Sections
         const sectDropdown = document.getElementById('cSection');
         for(let i=65; i<=90; i++) {
             let opt = document.createElement('option');
@@ -141,25 +124,27 @@
         }
 
         function save() {
-            localStorage.setItem('tt_master_v4', JSON.stringify(db));
+            localStorage.setItem('tt_final_v5', JSON.stringify(db));
             refreshUI();
         }
 
         function refreshUI() {
             const selector = document.getElementById('deleteSelector');
-            selector.innerHTML = '<option value="">-- Select Teacher --</option>' + 
-                db.teachers.map(t => `<option value="${t.id}">${t.name} (${t.sub})</option>`).join('');
+            // Refresh the teacher dropdown list
+            selector.innerHTML = '<option value="">-- View All Teachers --</option>' + 
+                db.teachers.map(t => `<option value="${t.id}">${t.name} [${t.sub}] - ${t.slot}</option>`).join('');
             
             document.getElementById('tCount').innerText = db.teachers.length;
             document.getElementById('cCount').innerText = db.classes.length;
         }
 
-        // --- ACTIONS ---
+        // --- CORE ACTIONS ---
         function addTeacher() {
             const name = document.getElementById('tName').value.trim();
             const sub = document.getElementById('tSubject').value;
             const slot = document.getElementById('tSlot').value;
-            if(!name) return alert("Please enter a name");
+            if(!name) return alert("Enter Teacher Name");
+            
             db.teachers.push({ id: Date.now() + Math.random(), name, sub, slot });
             document.getElementById('tName').value = '';
             save();
@@ -167,7 +152,7 @@
 
         function deleteSelectedTeacher() {
             const id = document.getElementById('deleteSelector').value;
-            if(!id) return alert("Select a teacher first");
+            if(!id) return alert("Please select a teacher from the list.");
             db.teachers = db.teachers.filter(t => t.id != id);
             save();
         }
@@ -175,115 +160,126 @@
         function addClass() {
             const grade = document.getElementById('cLevel').value;
             const sec = document.getElementById('cSection').value;
-            if(db.classes.find(c => c.grade == grade && c.sec == sec)) return alert("Section already exists");
+            if(db.classes.find(c => c.grade == grade && c.sec == sec)) return alert("Section exists.");
             db.classes.push({ id: Date.now(), grade, sec });
             save();
         }
 
         function clearCache() {
-            if(confirm("DANGER: This will erase all saved teachers and classes. Continue?")) {
-                localStorage.removeItem('tt_master_v4');
+            if(confirm("This will delete all saved data. Proceed?")) {
+                localStorage.removeItem('tt_final_v5');
                 location.reload();
             }
         }
 
-        // --- CSV ENGINE ---
+        // --- CSV IMPORT ENGINE ---
         document.getElementById('csvTeachers').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
             const reader = new FileReader();
-            reader.onload = function() {
-                const lines = reader.result.split('\n');
-                lines.forEach(line => {
-                    const [name, sub, slot] = line.split(',');
-                    if(name && sub) {
-                        db.teachers.push({ 
-                            id: Date.now() + Math.random(), 
-                            name: name.trim(), 
-                            sub: sub.trim(), 
-                            slot: slot?.trim().toLowerCase() || 'both' 
-                        });
+            reader.onload = function(event) {
+                const text = event.target.result;
+                const rows = text.split(/\r?\n/);
+                let importCount = 0;
+
+                rows.forEach(row => {
+                    const columns = row.split(',');
+                    if (columns.length >= 2) {
+                        const name = columns[0].trim();
+                        const sub = columns[1].trim();
+                        const slot = columns[2] ? columns[2].trim().toLowerCase() : 'both';
+
+                        if (name && sub) {
+                            db.teachers.push({
+                                id: Date.now() + Math.random(),
+                                name: name,
+                                sub: sub,
+                                slot: (slot === 'slot1' || slot === 'slot2') ? slot : 'both'
+                            });
+                            importCount++;
+                        }
                     }
                 });
+                
                 save();
-                alert("Import Complete!");
+                alert(`Successfully imported ${importCount} teachers!`);
+                e.target.value = ''; // Reset file input
             };
-            reader.readAsText(e.target.files[0]);
+            reader.readAsText(file);
         });
 
-        // --- GENERATION ALGORITHM (WITH CLUBBING & CONSISTENCY) ---
+        // --- TIMETABLE GENERATION (Rule: Clubbing + Consistency) ---
         function generate() {
             const activeSlot = document.getElementById('genSlot').value;
             let staff = db.teachers.filter(t => t.slot === activeSlot || t.slot === 'both');
             let groups = [...db.classes].sort((a,b) => a.grade - b.grade || a.sec.localeCompare(b.sec));
             
-            if(!staff.length) return alert("No teachers found for this slot!");
-            if(!groups.length) return alert("Please add at least one Class Section.");
+            if(!staff.length) return alert("No teachers available for this slot!");
+            if(!groups.length) return alert("Add at least one class section!");
 
             let teacherBusy = { 0: [], 1: [], 2: [] }; 
-            let finalData = [];
-            let processed = new Set();
+            let finalOutput = [];
+            let processedIds = new Set();
 
-            groups.forEach((current, index) => {
-                if(processed.has(current.id)) return;
+            groups.forEach((group) => {
+                if(processedIds.has(group.id)) return;
 
-                let row = { label: `${current.grade}-${current.sec}`, periods: [] };
+                let row = { title: `${group.grade}-${group.sec}`, pData: [] };
                 
                 for(let p=0; p<3; p++) {
-                    let available = staff.filter(t => !teacherBusy[p].includes(t.id));
+                    let availableTeachers = staff.filter(t => !teacherBusy[p].includes(t.id));
+                    let randomSubs = [...subjects].sort(() => 0.5 - Math.random());
                     let assigned = false;
 
-                    // Try to find a teacher for a subject
-                    // Shuffle subjects to give variety to different sections
-                    let shuffledSubs = [...subjects].sort(() => 0.5 - Math.random());
-                    
-                    for(let s of shuffledSubs) {
-                        let t = available.find(teacher => teacher.sub === s);
-                        if(t) {
-                            teacherBusy[p].push(t.id);
-                            row.periods[p] = { sub: t.sub, name: t.name, club: false };
+                    for(let s of randomSubs) {
+                        let match = availableTeachers.find(t => t.sub === s);
+                        if(match) {
+                            teacherBusy[p].push(match.id);
+                            row.pData[p] = { sub: match.sub, name: match.name, isClub: false };
                             assigned = true;
                             break;
                         }
                     }
 
-                    // AUTO-CLUBBING if no teacher found
+                    // AUTO-CLUBBING Logic
                     if(!assigned) {
-                        let clubTarget = finalData.find(prev => prev.periods[p] && !prev.periods[p].club && prev.label.split('-')[0] === current.grade);
-                        if(clubTarget) {
-                            row.label += ` & ${current.sec}`;
-                            row.periods[p] = { ...clubTarget.periods[p], club: true };
-                            clubTarget.periods[p].club = true;
+                        let prevClass = finalOutput.find(item => item.pData[p] && !item.pData[p].isClub && item.title.startsWith(group.grade));
+                        if(prevClass) {
+                            row.title += ` & ${group.sec}`;
+                            row.pData[p] = { ...prevClass.pData[p], isClub: true };
+                            prevClass.pData[p].isClub = true;
                             assigned = true;
                         } else {
-                            row.periods[p] = { sub: "No Staff", name: "Shortage", club: false };
+                            row.pData[p] = { sub: "No Staff", name: "Shortage", isClub: false };
                         }
                     }
                 }
-                finalData.push(row);
-                processed.add(current.id);
+                finalOutput.push(row);
+                processedIds.add(group.id);
             });
 
-            render(finalData);
+            renderTable(finalOutput);
         }
 
-        function render(data) {
-            let html = `<table id="ttTable" class="w-full border-collapse text-sm">
-                <thead><tr class="bg-slate-800 text-white text-left">
-                <th class="border-b border-slate-700 p-4">Grade-Section</th>
-                <th class="border-b border-slate-700 p-4 text-center">07:30 - 08:30</th>
-                <th class="border-b border-slate-700 p-4 text-center">08:30 - 09:30</th>
-                <th class="border-b border-slate-700 p-4 text-center">09:30 - 10:30</th>
-                </tr></thead><tbody>`;
+        function renderTable(data) {
+            let html = `<table id="mainTable" class="w-full border-collapse">
+                <thead class="bg-slate-900 text-white">
+                    <tr><th class="p-4 border border-slate-700">Section</th>
+                    <th class="p-4 border border-slate-700 text-center">07:30 - 08:30</th>
+                    <th class="p-4 border border-slate-700 text-center">08:30 - 09:30</th>
+                    <th class="p-4 border border-slate-700 text-center">09:30 - 10:30</th></tr>
+                </thead><tbody>`;
             
             data.forEach(row => {
-                html += `<tr class="border-b border-slate-100 hover:bg-indigo-50 transition-colors">
-                    <td class="p-4 font-bold text-slate-700 bg-slate-50/50 text-center border-r">${row.label}</td>`;
-                row.periods.forEach(cell => {
-                    const isClub = cell.club ? "bg-amber-50" : "";
-                    const isMissing = cell.sub === "No Staff" ? "text-red-400" : "text-indigo-700";
-                    html += `<td class="p-4 text-center border-r last:border-r-0 ${isClub}">
-                        <div class="font-extrabold ${isMissing}">${cell.sub}</div>
-                        <div class="text-[11px] text-slate-500 font-medium">${cell.name}</div>
-                        ${cell.club ? '<span class="inline-block mt-1 px-2 py-0.5 bg-amber-200 text-amber-800 text-[9px] font-black rounded uppercase">Clubbed</span>' : ''}
+                html += `<tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-4 border font-bold text-center bg-slate-50">${row.title}</td>`;
+                row.pData.forEach(cell => {
+                    const clubClass = cell.isClub ? "bg-amber-50" : "";
+                    html += `<td class="p-4 border text-center ${clubClass}">
+                        <div class="font-extrabold text-indigo-700">${cell.sub}</div>
+                        <div class="text-[10px] text-slate-500 font-medium">${cell.name}</div>
+                        ${cell.isClub ? '<span class="text-[8px] font-black text-amber-600 uppercase">Clubbed</span>' : ''}
                     </td>`;
                 });
                 html += `</tr>`;
@@ -293,18 +289,16 @@
 
         function exportPDF() { 
             const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'pt');
-            doc.text("Master Timetable", 40, 30);
-            doc.autoTable({ html: '#ttTable', theme: 'grid', startY: 50, styles: { cellPadding: 8, fontSize: 9 } });
-            doc.save("Timetable_Export.pdf"); 
+            doc.autoTable({ html: '#mainTable', theme: 'grid', styles: {fontSize: 8} });
+            doc.save("Timetable.pdf"); 
         }
 
         function exportExcel() { 
-            const table = document.getElementById("ttTable");
-            const wb = XLSX.utils.table_to_book(table); 
-            XLSX.writeFile(wb, "Timetable_Export.xlsx"); 
+            const wb = XLSX.utils.table_to_book(document.getElementById("mainTable")); 
+            XLSX.writeFile(wb, "Timetable.xlsx"); 
         }
 
-        // Initial Load
+        // Load Cache on startup
         refreshUI();
     </script>
 </body>
